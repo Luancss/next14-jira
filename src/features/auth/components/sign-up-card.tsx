@@ -38,6 +38,7 @@ export const SignUpCard = () => {
   });
 
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
+    console.log("Form values:", values); // Verifique se isso é exibido no console
     mutate({ json: values });
   };
 
