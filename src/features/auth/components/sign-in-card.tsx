@@ -1,13 +1,21 @@
+"use client";
+
+import { z } from "zod";
+import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -15,11 +23,13 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
+
+import { useLogin } from "../api/use-login";
 import { loginSchema } from "../schema";
 
-
 export const SignInCard = () => {
+  const { mutate, isPending } = useLogin();
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -29,16 +39,18 @@ export const SignInCard = () => {
   });
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    console.log(values);
+    mutate({ json: values });
   };
 
   return (
     <Card className="w-full h-full md:w-[487px] border-none shadow-none">
       <CardHeader className="flex items-center justify-center text-center p-7">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardTitle className="text-2xl">
+          Welcome back!
+        </CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <DottedSeparator  />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -67,7 +79,7 @@ export const SignInCard = () => {
                   <FormControl>
                     <Input
                       {...field}
-                      type="passwod"
+                      type="password"
                       placeholder="Enter password"
                     />
                   </FormControl>
@@ -75,7 +87,7 @@ export const SignInCard = () => {
                 </FormItem>
               )}
             />
-            <Button disabled={false} className="w-full">
+            <Button disabled={isPending} size="lg" className="w-full">
               Login
             </Button>
           </form>
@@ -86,19 +98,21 @@ export const SignInCard = () => {
       </div>
       <CardContent className="p-7 flex flex-col gap-y-4">
         <Button
-          className="w-full"
-          size="lg"
+          onClick={() => {}}
+          disabled={isPending}
           variant="secondary"
-          disabled={false}
+          size="lg"
+          className="w-full"
         >
           <FcGoogle className="mr-2 size-5" />
           Login with Google
         </Button>
         <Button
-          className="w-full"
-          size="lg"
+          onClick={() => {}}
+          disabled={isPending}
           variant="secondary"
-          disabled={false}
+          size="lg"
+          className="w-full"
         >
           <FaGithub className="mr-2 size-5" />
           Login with Github
