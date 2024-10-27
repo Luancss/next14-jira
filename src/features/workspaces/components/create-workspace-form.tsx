@@ -128,6 +128,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                           JPG, PNG, SVG or JPEG, max 1mb
                         </p>
                         <input
+                          title="Upload Image"
                           className="hidden"
                           type="file"
                           accept=".jpg, .png, .jpeg, .svg"
