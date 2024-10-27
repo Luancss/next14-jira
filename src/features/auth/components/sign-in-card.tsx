@@ -24,8 +24,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { loginSchema } from "../schemas";
 import { useLogin } from "../api/use-login";
-import { loginSchema } from "../schema";
 
 export const SignInCard = () => {
   const { mutate, isPending } = useLogin();
