@@ -5,7 +5,8 @@ import { ID } from "node-appwrite";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { AUTH_COOKIE } from "@/features/auth/constants";
-import { loginSchema, registerSchema } from "@/features/auth/schema";
+import { loginSchema, registerSchema } from "@/features/auth/schemas";
+
 
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
