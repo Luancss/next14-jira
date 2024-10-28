@@ -6,9 +6,36 @@ import { deleteCookie, setCookie } from "hono/cookie";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { AUTH_COOKIE } from "@/features/auth/constants";
 import { loginSchema, registerSchema } from "@/features/auth/schemas";
-
+import { DATABASE_ID, WORKSPACES_ID } from "@/config";
+import { createWorkspaceSchema } from "../schemas";
 
 const app = new Hono()
+  .get("/", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+
+    const workspaces = await databases.listDocuments(
+      DATABASE_ID,
+      WORKSPACES_ID
+    );
+
+    return c.json({ workspaces });
+  })
+  .post(
+    "/",
+    zValidator("form", createWorkspaceSchema),
+    sessionMiddleware,
+    async (c) => {
+      const { name } = c.req.valid("form");
+
+      const databases = c.get("databases");
+
+      await databases.createDocument(DATABASE_ID, WORKSPACES_ID, ID.unique(), {
+        name,
+      });
+
+      return c.json({ success: true });
+    }
+  )
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
 
