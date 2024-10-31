@@ -6,8 +6,14 @@ import { deleteCookie, setCookie } from "hono/cookie";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { AUTH_COOKIE } from "@/features/auth/constants";
 import { loginSchema, registerSchema } from "@/features/auth/schemas";
-import { DATABASE_ID, WORKSPACES_ID } from "@/config";
+import {
+  DATABASE_ID,
+  IMAGES_BUCKET_ID,
+  MEMBERS_ID,
+  WORKSPACES_ID,
+} from "@/config";
 import { createWorkspaceSchema } from "../schemas";
+import { MemberRole } from "@/features/members/types";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -25,15 +31,53 @@ const app = new Hono()
     zValidator("form", createWorkspaceSchema),
     sessionMiddleware,
     async (c) => {
-      const { name } = c.req.valid("form");
-
       const databases = c.get("databases");
+      const storage = c.get("storage");
+      const user = c.get("user");
+      const { name, image } = c.req.valid("form");
 
-      await databases.createDocument(DATABASE_ID, WORKSPACES_ID, ID.unique(), {
-        name,
-      });
+      let uploadedImageUrl: string | undefined;
 
-      return c.json({ success: true });
+      if (image instanceof File) {
+        const file = await storage.createFile(
+          IMAGES_BUCKET_ID,
+          ID.unique(),
+          image
+        );
+
+        const arrayBuffer = await storage.getFilePreview(
+          IMAGES_BUCKET_ID,
+          file.$id
+        );
+
+        uploadedImageUrl = `data:image/png;base64,${Buffer.from(
+          arrayBuffer
+        ).toString("base64")}`;
+      }
+
+      const workspace = await databases.createDocument(
+        DATABASE_ID,
+        WORKSPACES_ID,
+        ID.unique(),
+        {
+          name,
+          userId: user.$id,
+          imageUrl: uploadedImageUrl,
+        }
+      );
+
+      await databases.createDocument(
+        DATABASE_ID,
+        MEMBERS_ID,
+        ID.unique(),
+        {
+          userId: user.$id,
+          workspaceId: workspace.$id,
+          role: MemberRole.ADMIN,
+        }
+      );
+
+      return c.json({ data: workspace });
     }
   )
   .get("/current", sessionMiddleware, async (c) => {
